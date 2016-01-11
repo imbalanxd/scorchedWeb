@@ -1,0 +1,100 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+
+<script id="shader-fs" type="x-shader/x-fragment">
+precision mediump float;
+uniform vec3 color;
+
+varying highp vec3 vLighting;
+varying highp vec3 vC;
+void main(void) 
+{
+    gl_FragColor = vec4(vC, 1.0);
+}
+</script>
+
+<script id="shader-vs" type="x-shader/x-vertex">
+attribute highp vec3 aVertexPosition;
+attribute highp vec2 aTexCoord;
+
+uniform highp mat4 uMVMatrix;
+uniform highp mat4 uPMatrix;
+uniform highp mat4 uNormalMatrix;
+
+varying highp vec3 vLighting;
+varying highp vec3 vC;
+
+uniform sampler2D heightmap;
+uniform sampler2D normalmap;
+
+void main(void) 
+{
+    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition.x, texture2D(heightmap, aTexCoord).a*100.0, aVertexPosition.z,1.0);
+
+    highp vec3 ambientLight = vec3(0.3, 0.3, 0.3);
+    highp vec3 directionalLightColor = vec3(1.0, 1.0, 1.0);
+    highp vec3 directionalVector = vec3(0.0, 0.7, -0.7);
+    //highp vec3 directionalVector = vec3(0.0, 0.0, -1.0); //NEAR FAR
+    //highp vec3 directionalVector = vec3(0.0, 1.0, 0.0); //TOP DOWN
+    //highp vec3 directionalVector = vec3(1.0, 0.0, 0.0); //RIGHT LEFT
+
+    //highp vec4 transformedDirectional = uPMatrix* uMVMatrix * vec4(directionalVector, 0.0);
+    //highp vec4 transformedNormal = uNormalMatrix * vec4(aVertexPosition.xyz, 1.0);
+
+    //directionalVector = transformedDirectional.xyz;
+
+    highp vec3 topDownVector = vec3(0.0, 0.0, -1.0); //TOP DOWN
+    //highp float angle = max(dot(topDownVector.xyz, aVertexPosition.xyz), 0.0);
+    // if(angle < 0.3)
+    // 	vC = vec3(0.4, 0.4, 0.4);
+    // else if(angle < 0.55)
+    // 	vC = vec3(0.45, 0.29, 0.15);
+    // else
+    vC = texture2D(normalmap, aTexCoord).xyz;
+
+    //highp float directional = max(dot(directionalVector.xyz, transformedNormal.xyz), 0.0) * 0.4;
+    //highp float diffuse = max(dot(aVertexPosition.xyz, directionalVector.xyz), 0.0) * 0.5;
+    vLighting = vec3(1,1,1);//ambientLight + (directionalLightColor * (directional + diffuse));
+}
+</script>
+
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+<script src="Geometry.js"></script>
+<script src="InputHandler.js"></script>
+<script src="ContextGL.js"></script>
+<script src="Scorched3DGame.js"></script>
+<script src="GameObject.js"></script>
+<script src="ImprovedNoise.js"></script>
+<script src="Terrain.js"></script>
+<script src="Tank.js"></script>
+<script src="ProjectileFactory.js"></script>
+<script src="Projectile.js"></script>
+<script src="Camera.js"></script>
+
+
+	<head> 
+		<meta charset="UTF-8"> 
+		<title>Scorched3D</title>
+		<STYLE type="text/css"> 
+			body {	
+				margin: 0px;
+				padding: 0px;
+				background-color: black;
+				text-align: center;
+			}
+			#gameCanvas {
+				position:relative;
+			}
+		</STYLE> 
+	</head> 
+	<body>
+		<script> 
+			startGame = function()
+				{
+					game = new Scorched3DGame(document.body, 1200, 700);
+					game.webGLStart();
+				}
+			window.onload = startGame();
+		</script>
+	</body> 
+</html> 
